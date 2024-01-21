@@ -1,0 +1,85 @@
+---
+- name: Install Pi-hole
+  hosts: pis  
+  become: yes  # Run tasks with sudo privileges
+
+  vars:
+    internal_network: "192.168.2.0/24"
+    internal_ip: "192.168.2.138"
+    internal_netmask: "24"
+    internal_domain: "link"
+
+  tasks:
+    - name: Ensure Pi-hole configuration directory exists
+      ansible.builtin.file:
+        path: /etc/pihole
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Configure Pi-hole installation variables
+      ansible.builtin.template:
+        src: templates/pihole.setupvars.j2
+        dest: /etc/pihole/setupVars.conf
+        owner: root
+        group: root
+        mode: '0644'
+      vars:
+        internal_ifname: "wlan0"
+        ipv4_address_with_netmask: "{{ internal_ip }}/{{ internal_netmask }}"
+        local_domain_name: "{{ internal_domain }}"
+        dhcp_range_start: "{{ dhcp_start }}"
+        dhcp_range_end: "{{ dhcp_end}}"
+        dhcp_router: "{{ internal_ip }}"
+
+    - name: Ensure dnsmasq configuration directory exists
+      ansible.builtin.file:
+        path: /etc/dnsmasq.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Add extra dnsmasq configuration
+      ansible.builtin.template:
+        src: templates/dnsmasq.extras.j2
+        dest: /etc/dnsmasq.d/10-extra.conf
+        owner: root
+        group: root
+        mode: '0644'
+      vars:
+        local_domain_name: "{{ internal_domain }}"
+
+    - name: Install CA certs
+      ansible.builtin.apt:
+        name: ca-certificates
+        state: latest
+
+    - name: Download Pi-hole installer
+      get_url:
+        url: https://install.pi-hole.net
+        dest: /etc/pihole/basic-install.sh
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Install Pi-hole
+      command: /etc/pihole/basic-install.sh --unattended
+    
+    - name: Redirect Lighttpd default page to Pi-hole admin interface
+      ansible.builtin.copy:
+        dest: /var/www/html/index.lighttpd.html
+        content: |
+          <html>
+            <head>
+              <meta http-equiv="refresh" content="0;url=/admin/" />
+            </head>
+            <body>
+              <p>Redirecting to <a href="/admin/">Pi-hole admin interface</a>...</p>
+            </body>
+          </html>
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
