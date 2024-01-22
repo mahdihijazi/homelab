@@ -1,0 +1,10 @@
+---
+- name: Install Dependencies for Managing Pi-hole
+  hosts: pis
+  become: yes  # Necessary to install packages with elevated privileges
+
+  tasks:
+    - name: Install SQLite3
+      ansible.builtin.apt:
+        name: sqlite3
+        state: present

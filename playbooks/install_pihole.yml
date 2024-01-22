@@ -9,6 +9,8 @@
     internal_ip: "192.168.2.138"
     internal_netmask: "24"
     internal_domain: "link"
+    stevenblack_hosts_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+
 
   tasks:
     - name: Ensure Pi-hole configuration directory exists
@@ -30,8 +32,6 @@
         internal_ifname: "wlan0"
         ipv4_address_with_netmask: "{{ internal_ip }}/{{ internal_netmask }}"
         local_domain_name: "{{ internal_domain }}"
-        dhcp_range_start: "{{ dhcp_start }}"
-        dhcp_range_end: "{{ dhcp_end}}"
         dhcp_router: "{{ internal_ip }}"
 
     - name: Ensure dnsmasq configuration directory exists
@@ -83,4 +83,24 @@
         owner: www-data
         group: www-data
         mode: '0644'
+    
+    - name: Add a new adlist to Pi-hole using sqlite3
+      ansible.builtin.shell:
+        cmd: "sqlite3 /etc/pihole/gravity.db \"INSERT INTO adlist (address, enabled, comment) VALUES ('{{ stevenblack_hosts_url }}', 1, 'Added via Ansible');\""
+      become: true
+      args:
+        executable: /bin/bash
+      
+    - name: Update Pi-hole Gravity
+      ansible.builtin.command:
+        cmd: pihole -g
+      become: true
+      notify: Restart Pi-hole
+
+  handlers:
+    - name: Restart Pi-hole
+      command: "pihole restartdns reload-lists"
+      become: true
+
+
 
