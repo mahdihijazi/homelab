@@ -6,7 +6,7 @@
     - pihole_vault.yml
   vars:
     internal_network: "192.168.2.0/24"
-    internal_ip: "192.168.2.138"
+    internal_ip: "192.168.2.100"
     internal_netmask: "24"
     internal_domain: "link"
     stevenblack_hosts_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
@@ -83,14 +83,20 @@
         owner: www-data
         group: www-data
         mode: '0644'
-    
-    - name: Add a new adlist to Pi-hole using sqlite3
-      ansible.builtin.shell:
-        cmd: "sqlite3 /etc/pihole/gravity.db \"INSERT INTO adlist (address, enabled, comment) VALUES ('{{ stevenblack_hosts_url }}', 1, 'Added via Ansible');\""
-      become: true
-      args:
-        executable: /bin/bash
       
+    - name: Check if the adlist already exists in Pi-hole
+      ansible.builtin.command:
+        cmd: "sqlite3 /etc/pihole/gravity.db \"SELECT address FROM adlist WHERE address = '{{ stevenblack_hosts_url }}';\""
+      register: adlist_check
+      changed_when: false
+      ignore_errors: true
+
+    - name: Add a new adlist to Pi-hole using sqlite3
+      ansible.builtin.command:
+        cmd: "sqlite3 /etc/pihole/gravity.db \"INSERT INTO adlist (address, enabled, comment) VALUES ('{{ stevenblack_hosts_url }}', 1, 'Added via Ansible');\""
+      when: adlist_check.stdout == ""
+      become: true
+
     - name: Update Pi-hole Gravity
       ansible.builtin.command:
         cmd: pihole -g
