@@ -1,12 +1,12 @@
 ---
 - name: Install Pi-hole
-  hosts: pis  
+  hosts: link  
   become: true  # Run tasks with sudo privileges
   vars_files:
     - pihole_vault.yml
   vars:
     internal_network: "192.168.2.0/24"
-    internal_ip: "192.168.2.100"
+    internal_ip: "{{ ansible_host }}"
     internal_netmask: "24"
     internal_domain: "link"
     stevenblack_hosts_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
