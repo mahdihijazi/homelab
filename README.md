@@ -18,11 +18,11 @@ This project provides an Ansible playbook for setting up a Raspberry Pi as a net
     - Make sure your Pi is connected to the internet.
 
 1. **Add a Sudo User:**
-   - SSH into your Raspberry Pi: ssh pi@<raspberry-pi-ip>
-   - Create a new user: sudo adduser <username>
-   - Add the user to the sudo group: sudo usermod -aG sudo <username>
-   - Edit the sudoers file for passwordless sudo: sudo visudo
-   - Append this line: <username> ALL=(ALL) NOPASSWD: ALL
+   - SSH into your Raspberry Pi: `ssh pi@<raspberry-pi-ip>`
+   - Create a new user: `sudo adduser <username>`
+   - Add the user to the sudo group: `sudo usermod -aG sudo <username>`
+   - Edit the sudoers file for passwordless sudo: `sudo visudo`
+   - Append this line: `<username> ALL=(ALL) NOPASSWD: ALL`
 
 1. **Update the System:**
    - Run: ```sudo apt update && sudo apt upgrade -y```
@@ -44,19 +44,19 @@ This project provides an Ansible playbook for setting up a Raspberry Pi as a net
 
 ## Running the Playbook
 1. Execute the Playbook:
+   - Run: ansible-playbook -i inventories/hosts playbooks/main.yml --ask-vault-pass
+   - Enter the vault password when prompted.
+1. Verify Installation:
+   - Check the Pi-hole admin interface at http://<raspberry-pi-ip>/admin/.
+   - Verify Unbound: ```ssh <username>@<raspberry-pi-ip> 'systemctl status unbound'```
 
-Run: ansible-playbook -i inventories/hosts playbooks/main.yml --ask-vault-pass
-Enter the vault password when prompted.
-Verify Installation:
+## Configure Router to Use Pi-hole
+1. Router DNS Settings:
+   - Log into your router's settings.
+   - Set the DNS server to your Raspberry Pi's IP.
+   - Apply and save changes.
 
-Check the Pi-hole admin interface at http://<raspberry-pi-ip>/admin/.
-Verify Unbound: ssh <username>@<raspberry-pi-ip> 'systemctl status unbound'
-Configure Router to Use Pi-hole
-Router DNS Settings:
-Log into your router's settings.
-Set the DNS server to your Raspberry Pi's IP.
-Apply and save changes.
-Conclusion
+## Conclusion
 Your Raspberry Pi should now be running Pi-hole with Unbound, serving as an ad blocker and secure DNS resolver for your network.
 
-Remember to replace <username>, <raspberry-pi-ip>, and <repository-url> with your actual user name, Raspberry Pi's IP address, and the repository URL. This README assumes that your project repository includes all necessary playbooks and configuration files for Pi-hole and Unbound setup. Let me know if you need to include any additional details or if there's any other assistance you require!
+Remember to replace <username>, <raspberry-pi-ip>, and <repository-url> with your actual user name, Raspberry Pi's IP address, and the repository URL.
