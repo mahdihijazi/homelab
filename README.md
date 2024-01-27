@@ -59,4 +59,4 @@ This project provides an Ansible playbook for setting up a Raspberry Pi as a net
 ## Conclusion
 Your Raspberry Pi should now be running Pi-hole with Unbound, serving as an ad blocker and secure DNS resolver for your network.
 
-Remember to replace <username>, <raspberry-pi-ip>, and <repository-url> with your actual user name, Raspberry Pi's IP address, and the repository URL.
+Remember to replace ```<username>, <raspberry-pi-ip>, and <repository-url>``` with your actual user name, Raspberry Pi's IP address, and the repository URL.
