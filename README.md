@@ -37,9 +37,9 @@ This project provides an Ansible playbook for setting up a Raspberry Pi as a net
     - Update it with your Raspberry Pi's IP address.
 1. Create an Ansible Vault for Pi-hole Password:
     - Hash the password: ```echo -n 'P@ssw0rd' | sha256sum | awk '{printf "%s",$1 }' | sha256sum```
-    - Create the vault: ```ansible-vault create pihole_vault.yml```
-    - Add this content (without space after the colon):
-    ```pihole_password:<Hashed Password>```
+    - Create the vault: ```ansible-vault create homelab_vault.yml```
+    - Add the hashed password gnerated to the vault:
+    ```pihole_password: <Hashed Password>```
     - Save and exit the file.
 
 ## Running the Playbook
