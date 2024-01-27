@@ -1,6 +1,6 @@
 ---
 - name: Configure Raspberry Pi
-  hosts: link
+  hosts: pis
   remote_user: pi
   become: true
   vars_files:
