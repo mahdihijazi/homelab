@@ -1,0 +1,59 @@
+---
+- name: Configure Raspberry Pi
+  hosts: link
+  remote_user: pi
+  become: true
+  vars_files:
+    - homelab_vault.yml
+
+  tasks:
+    - name: Create user 'mahdi'
+      user:
+        name: mahdi
+        password: "{{ user_mahdi_password | password_hash('sha512') }}"
+        groups: sudo
+        append: yes
+        create_home: yes
+
+    - name: Allow 'mahdi' to execute sudo commands without a password
+      lineinfile:
+        path: /etc/sudoers
+        line: 'mahdi ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Ensure .ssh directory exists for 'mahdi'
+      file:
+        path: /home/mahdi/.ssh
+        state: directory
+        owner: mahdi
+        group: mahdi
+        mode: '0700'
+
+    - name: Copy SSH keys from 'pi' to 'mahdi'
+      ansible.builtin.copy:
+        src: /home/pi/.ssh/
+        dest: /home/mahdi/.ssh/
+        remote_src: yes
+        owner: mahdi
+        group: mahdi
+        mode: '0700'
+
+    - name: Set proper permissions for .ssh directory
+      file:
+        path: "/home/mahdi/.ssh"
+        owner: mahdi
+        group: mahdi
+        mode: '0700'
+
+    - name: Disable password authentication for 'mahdi'
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regexp: '^PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+      notify: restart sshd
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: ssh
+        state: restarted
