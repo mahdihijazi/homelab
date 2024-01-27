@@ -1,21 +1,8 @@
 ---
-- name: Install and Configure Pi-hole with Unbound
-  hosts: pis
-  become: yes
+- name: Install Unbound
+  hosts: link
+  become: true
   tasks:
-    - name: Update and Upgrade all packages
-      ansible.builtin.apt:
-        update_cache: yes
-        upgrade: dist
-        autoremove: yes
-        autoclean: yes
-
-    - name: Install Pi-hole
-      shell: |
-        curl -sSL https://install.pi-hole.net | bash
-      args:
-        creates: /etc/pihole/setupVars.conf
-
     - name: Install Unbound
       ansible.builtin.apt:
         name: unbound
@@ -26,6 +13,8 @@
         path: /etc/unbound/unbound.conf.d/pi-hole.conf
         block: |
           server:
+            do-ip6: no
+            port: 5335
             interface: 0.0.0.0
             access-control: 127.0.0.0/8 allow
             access-control: 192.168.0.0/16 allow
@@ -53,6 +42,7 @@
             module-config: "validator iterator"
         create: yes
         backup: yes
+
 
     - name: Restart Unbound to apply configuration
       ansible.builtin.systemd:

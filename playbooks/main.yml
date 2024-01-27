@@ -7,3 +7,6 @@
 
 - name: Install and Configure Pi-hole
   import_playbook: install_pihole.yml
+
+- name: Install Unbound and Configure Pi-hole to use it
+  import_playbook: install_unbound.yml
