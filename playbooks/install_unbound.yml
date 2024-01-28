@@ -43,15 +43,8 @@
         create: yes
         backup: yes
 
-
     - name: Restart Unbound to apply configuration
       ansible.builtin.systemd:
         name: unbound
         state: restarted
         enabled: yes
-
-    - name: Configure Pi-hole to use Unbound as DNS server
-      shell: |
-        pihole -a setdns 127.0.0.1#5335
-      args:
-        executable: /bin/bash
