@@ -1,0 +1,66 @@
+---
+- name: Install WireGuard and WireGuard UI on Link
+  hosts: link
+  become: true
+  vars_files:
+    - homelab_vault.yml  # Make sure this path matches your actual vault file location
+
+  tasks:
+    - name: Install WireGuard
+      ansible.builtin.package:
+        name: wireguard
+        state: present
+
+    - name: Install Docker
+      ansible.builtin.package:
+        name: docker.io
+        state: latest
+
+    - name: Ensure Docker Service is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install Docker Compose using apt
+      ansible.builtin.package:
+        name: docker-compose
+        state: latest
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Deploy WireGuard UI
+      ansible.builtin.docker_container:
+        name: wireguard-ui
+        image: ngoduykhanh/wireguard-ui:latest
+        state: started
+        published_ports:
+          - "51821:5000"
+        volumes:
+          - "/etc/wireguard:/etc/wireguard"
+        restart_policy: always
+        env:
+          WG_UI_USER: "admin"
+          WG_UI_PASS: "{{ wg_ui_password }}"  # This variable is expected to be defined in your vault file
+
+- name: Ensure user has Docker daemon access
+  hosts: link
+  become: true
+  tasks:
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: mahdi
+        groups: docker
+        append: yes
+      notify: Restart Docker Service
+
+  handlers:
+    - name: Restart Docker Service
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+
+    - name: Restart Docker Service
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+

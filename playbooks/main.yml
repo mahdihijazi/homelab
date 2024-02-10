@@ -1,3 +1,7 @@
 ---
 - name: Install Pi-hole and Unbound
   import_playbook: install_pihole_unbound.yml
+
+
+- name: Install Wireguard VPN
+  import_playbook: install_wireguard.yml
