@@ -10,7 +10,9 @@
     internal_netmask: "24"
     internal_domain: "{{ ansible_hostname }}"
     stevenblack_hosts_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
-
+    local_dns_records:
+      - { name: "mijnmodem.kpn", ip: "192.168.2.254" }
+      - { name: "nas.local", ip: "192.168.2.2" }
 
   tasks:
     - name: Ensure Pi-hole configuration directory exists
@@ -96,6 +98,14 @@
         cmd: "sqlite3 /etc/pihole/gravity.db \"INSERT INTO adlist (address, enabled, comment) VALUES ('{{ stevenblack_hosts_url }}', 1, 'Added via Ansible');\""
       when: adlist_check.stdout == ""
       become: true
+
+    - name: Add custom DNS records for Pi-hole
+      ansible.builtin.lineinfile:
+        path: /etc/pihole/custom.list
+        line: "{{ item.ip }} {{ item.name }}"
+        create: yes
+        state: present
+      loop: "{{ local_dns_records }}"
 
     - name: Update Pi-hole Gravity
       ansible.builtin.command:
