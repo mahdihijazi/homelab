@@ -1,6 +1,6 @@
 ---
 - name: Install Pi-hole
-  hosts: link  
+  hosts: link, zelda
   become: true  # Run tasks with sudo privileges
   vars_files:
     - homelab_vault.yml
@@ -8,7 +8,7 @@
     internal_network: "192.168.2.0/24"
     internal_ip: "{{ ansible_host }}"
     internal_netmask: "24"
-    internal_domain: "link"
+    internal_domain: "{{ ansible_hostname }}"
     stevenblack_hosts_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
 
 

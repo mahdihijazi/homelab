@@ -1,3 +1,4 @@
 [pis]
 link ansible_host=192.168.2.100
+zelda ansible_host=192.168.2.101
 #tod ansible_host=192.168.2.2

@@ -1,6 +1,6 @@
 ---
 - name: Install Unbound
-  hosts: link
+  hosts: link, zelda
   become: true
   tasks:
     - name: Install Unbound
