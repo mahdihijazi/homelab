@@ -3,7 +3,7 @@
   hosts: link
   become: true
   vars_files:
-    - homelab_vault.yml  # Make sure this path matches your actual vault file location
+    - homelab_vault.yml
 
   tasks:
     - name: Install required packages
@@ -22,12 +22,6 @@
         name: docker
         state: started
         enabled: yes
-
-    - name: Remove existing WireGuard UI container
-      ansible.builtin.docker_container:
-          name: wireguard-ui
-          state: absent
-      ignore_errors: true
 
     - name: Deploy WireGuard UI using shell command for capabilities and restart policy
       ansible.builtin.shell: |
