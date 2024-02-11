@@ -6,32 +6,22 @@
     - homelab_vault.yml  # Make sure this path matches your actual vault file location
 
   tasks:
-    - name: Ensure UFW is installed
+    - name: Install required packages
       ansible.builtin.package:
-        name: ufw
+        name: "{{ item }}"
         state: present
-
-    - name: Install WireGuard
-      ansible.builtin.package:
-        name: wireguard
-        state: present
-
-    - name: Install Docker
-      ansible.builtin.package:
-        name: docker.io
-        state: latest
+      loop:
+        - ufw
+        - wireguard
+        - docker.io
+        - docker-compose  # Conditional based on OS family
+      when: ansible_facts['os_family'] == "Debian"
 
     - name: Ensure Docker Service is running
       ansible.builtin.service:
         name: docker
         state: started
         enabled: yes
-
-    - name: Install Docker Compose using apt
-      ansible.builtin.package:
-        name: docker-compose
-        state: latest
-      when: ansible_facts['os_family'] == "Debian"
 
     - name: Remove existing WireGuard UI container
       ansible.builtin.docker_container:
