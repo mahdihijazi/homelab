@@ -33,22 +33,28 @@
         state: latest
       when: ansible_facts['os_family'] == "Debian"
 
-    - name: Deploy WireGuard UI
+    - name: Remove existing WireGuard UI container
       ansible.builtin.docker_container:
-        name: wireguard-ui
-        image: ngoduykhanh/wireguard-ui:latest
-        state: started
-        published_ports:
-          - "51822:5000"
-        volumes:
-          - "/etc/wireguard:/etc/wireguard"
-        restart_policy: always
-        env:
-          WGUI_USERNAME: "mahdi"
-          WGUI_PASSWORD: "{{ wg_ui_password }}"  # This variable is expected to be defined in your vault file
-          WGUI_SERVER_INTERFACE_ADDRESSES: "10.252.1.0/24"
-          WGUI_FIREWALL_MARK: "0xca6c" # 51821
-          WGUI_ENDPOINT_ADDRESS: "morningcoffee.ddns.net"
+          name: wireguard-ui
+          state: absent
+      ignore_errors: true
+
+    - name: Deploy WireGuard UI using shell command for capabilities and restart policy
+      ansible.builtin.shell: |
+        docker container rm -f wireguard-ui || true
+        docker run -d --name wireguard-ui --cap-add=NET_ADMIN --restart unless-stopped -p 51822:5000 -v /etc/wireguard:/etc/wireguard \
+        -e WGUI_USERNAME="mahdi" \
+        -e WGUI_PASSWORD="{{ wg_ui_password }}" \
+        -e WGUI_SERVER_INTERFACE_ADDRESSES="10.252.1.0/24" \
+        -e WGUI_SERVER_LISTEN_PORT="51821" \
+        -e WGUI_FIREWALL_MARK="0xca6c" \
+        -e WGUI_ENDPOINT_ADDRESS="morningcoffee.ddns.net:51821" \
+        -e WGUI_DEFAULT_CLIENT_ALLOWED_IPS="0.0.0.0/0, ::0/0" \
+        -e WGUI_MANAGE_RESTART="true" \
+        -e WGUI_MANAGE_START="true" \
+        ngoduykhanh/wireguard-ui:latest
+      args:
+        executable: /bin/bash
  
     - name: Open ports for WireGuard and WireGuard UI
       ansible.builtin.ufw:
@@ -68,12 +74,14 @@
 
     - name: Allow forwarded traffic to WireGuard clients (related, established)
       ansible.builtin.iptables:
+        table: filter
         chain: FORWARD
         out_interface: wg0
         destination: 10.252.1.0/24
-        match: state
-        state: RELATED,ESTABLISHED
+        match: conntrack
+        ctstate: RELATED,ESTABLISHED
         jump: ACCEPT
+        state: present
 
     - name: Install iptables-persistent
       ansible.builtin.package:
