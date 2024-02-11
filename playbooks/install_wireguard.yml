@@ -94,6 +94,56 @@
       args:
         creates: /etc/iptables/rules.v4
 
+    - name: Enable WireGuard to start on boot
+      ansible.builtin.systemd:
+        name: wg-quick@wg0
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+    - name: Create systemd service file for WireGuard auto-restart
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/wgui.service
+        content: |
+          [Unit]
+          Description=Restart WireGuard
+          After=network.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/bin/systemctl restart wg-quick@wg0.service
+
+          [Install]
+          RequiredBy=wgui.path
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Create systemd path watcher file for WireGuard configuration
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/wgui.path
+        content: |
+          [Unit]
+          Description=Watch /etc/wireguard/wg0.conf for changes
+
+          [Path]
+          PathModified=/etc/wireguard/wg0.conf
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd daemon to apply new unit files
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Enable and start the WireGuard configuration path watcher
+      ansible.builtin.systemd:
+        name: wgui.path
+        enabled: yes
+        state: started
 
   handlers:
   - name: Restart WireGuard UI
