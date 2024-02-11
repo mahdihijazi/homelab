@@ -6,6 +6,11 @@
     - homelab_vault.yml  # Make sure this path matches your actual vault file location
 
   tasks:
+    - name: Ensure UFW is installed
+      ansible.builtin.package:
+        name: ufw
+        state: present
+
     - name: Install WireGuard
       ansible.builtin.package:
         name: wireguard
@@ -34,13 +39,59 @@
         image: ngoduykhanh/wireguard-ui:latest
         state: started
         published_ports:
-          - "51821:5000"
+          - "51822:5000"
         volumes:
           - "/etc/wireguard:/etc/wireguard"
         restart_policy: always
         env:
-          WG_UI_USER: "admin"
-          WG_UI_PASS: "{{ wg_ui_password }}"  # This variable is expected to be defined in your vault file
+          WGUI_USERNAME: "mahdi"
+          WGUI_PASSWORD: "{{ wg_ui_password }}"  # This variable is expected to be defined in your vault file
+          WGUI_SERVER_INTERFACE_ADDRESSES: "10.252.1.0/24"
+          WGUI_FIREWALL_MARK: "0xca6c" # 51821
+          WGUI_ENDPOINT_ADDRESS: "morningcoffee.ddns.net"
+ 
+    - name: Open ports for WireGuard and WireGuard UI
+      ansible.builtin.ufw:
+        rule: allow
+        port: "{{ item.port }}"
+        proto: "{{ item.proto }}"
+      loop:
+        - { port: 51821, proto: udp }  # WireGuard typically uses UDP
+        - { port: 51822, proto: tcp }  # WireGuard UI uses TCP for web interface access
+
+    - name: Allow forwarded traffic from WireGuard clients
+      ansible.builtin.iptables:
+        chain: FORWARD
+        in_interface: wg0
+        source: 10.252.1.0/24
+        jump: ACCEPT
+
+    - name: Allow forwarded traffic to WireGuard clients (related, established)
+      ansible.builtin.iptables:
+        chain: FORWARD
+        out_interface: wg0
+        destination: 10.252.1.0/24
+        match: state
+        state: RELATED,ESTABLISHED
+        jump: ACCEPT
+
+    - name: Install iptables-persistent
+      ansible.builtin.package:
+        name: iptables-persistent
+        state: present
+
+    - name: Save iptables rules
+      ansible.builtin.command:
+        cmd: "/bin/sh -c 'iptables-save > /etc/iptables/rules.v4'"
+      args:
+        creates: /etc/iptables/rules.v4
+
+
+  handlers:
+  - name: Restart WireGuard UI
+    ansible.builtin.docker_container:
+      name: wireguard-ui
+      state: restarted
 
 - name: Ensure user has Docker daemon access
   hosts: link
@@ -52,12 +103,6 @@
         groups: docker
         append: yes
       notify: Restart Docker Service
-
-  handlers:
-    - name: Restart Docker Service
-      ansible.builtin.service:
-        name: docker
-        state: restarted
 
     - name: Restart Docker Service
       ansible.builtin.service:
