@@ -23,10 +23,28 @@
         state: started
         enabled: yes
 
+    - name: Ensure user has Docker daemon access
+      ansible.builtin.user:
+        name: mahdi
+        groups: docker
+        append: yes
+      notify: Restart Docker Service
+
+    - name: Ensure persistent storage directory exists
+      ansible.builtin.file:
+        path: ~/wireguard/
+        state: directory
+        owner: mahdi 
+        group: docker 
+        mode: '0755' 
+
     - name: Deploy WireGuard UI using shell command for capabilities and restart policy
       ansible.builtin.shell: |
         docker container rm -f wireguard-ui || true
-        docker run -d --name wireguard-ui --cap-add=NET_ADMIN --restart unless-stopped -p 51822:5000 -v /etc/wireguard:/etc/wireguard \
+        docker run -d --name wireguard-ui --cap-add=NET_ADMIN --restart unless-stopped \
+        -p 51822:5000 \
+        -v ~/wireguard/db:/app/db \  
+        -v /etc/wireguard:/etc/wireguard \
         -e WGUI_USERNAME="mahdi" \
         -e WGUI_PASSWORD="{{ wg_ui_password }}" \
         -e WGUI_SERVER_INTERFACE_ADDRESSES="10.252.1.0/24" \
@@ -39,7 +57,8 @@
         ngoduykhanh/wireguard-ui:latest
       args:
         executable: /bin/bash
- 
+
+
     - name: Open ports for WireGuard and WireGuard UI
       ansible.builtin.ufw:
         rule: allow
@@ -135,19 +154,7 @@
       name: wireguard-ui
       state: restarted
 
-- name: Ensure user has Docker daemon access
-  hosts: link
-  become: true
-  tasks:
-    - name: Add user to docker group
-      ansible.builtin.user:
-        name: mahdi
-        groups: docker
-        append: yes
-      notify: Restart Docker Service
-
-    - name: Restart Docker Service
-      ansible.builtin.service:
-        name: docker
-        state: restarted
-
+  - name: Restart Docker Service
+    ansible.builtin.service:
+      name: docker
+      state: restarted
