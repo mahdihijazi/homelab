@@ -24,7 +24,7 @@
           RESPONSE=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/{{ cloudflare_zone_id }}/dns_records/{{ cloudflare_dns_record_id }}" \
           -H "Authorization: Bearer {{ cloudflare_api_key }}" \
           -H "Content-Type: application/json" \
-          --data '{"type":"A","name":"mahdihome.online","content":"'$IP'","ttl":120,"proxied":false}')
+          --data '{"type":"A","name":"mahdihome.online","content":"'$IP'","ttl":120,"proxied":true}')
           echo $RESPONSE
 
     - name: Create a cron job to update DNS record after reboot
