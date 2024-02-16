@@ -32,7 +32,7 @@
 
     - name: Ensure persistent storage directory exists
       ansible.builtin.file:
-        path: ~/wireguard/
+        path: /home/mahdi/wireguard/
         state: directory
         owner: mahdi 
         group: docker 
@@ -43,7 +43,7 @@
         docker container rm -f wireguard-ui || true
         docker run -d --name wireguard-ui --cap-add=NET_ADMIN --restart unless-stopped \
         -p 51822:5000 \
-        -v ~/wireguard/db:/app/db \  
+        -v /home/mahdi/wireguard/db:/app/db \  
         -v /etc/wireguard:/etc/wireguard \
         -e WGUI_USERNAME="mahdi" \
         -e WGUI_PASSWORD="{{ wg_ui_password }}" \
