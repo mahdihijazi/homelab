@@ -1,0 +1,44 @@
+---
+- name: Update DNS Record for mahdihome.online using Cloudflare API
+  hosts: link
+  become: true
+  vars_files:
+     - homelab_vault.yml
+  vars:
+    cloudflare_dns_record_id: "e76e116fc66f2aaff21170385782bd8e"
+
+  tasks:
+    - name: Install necessary packages
+      ansible.builtin.package:
+        name: curl
+        state: present
+
+    - name: Deploy the IP update script
+      ansible.builtin.copy:
+        dest: /usr/local/bin/update_cloudflare_dns.sh
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          IP=$(curl -s http://ipv4.icanhazip.com)
+          echo "Current IP is $IP"
+          RESPONSE=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/{{ cloudflare_zone_id }}/dns_records/{{ cloudflare_dns_record_id }}" \
+          -H "Authorization: Bearer {{ cloudflare_api_key }}" \
+          -H "Content-Type: application/json" \
+          --data '{"type":"A","name":"mahdihome.online","content":"'$IP'","ttl":120,"proxied":false}')
+          echo $RESPONSE
+
+    - name: Create a cron job to update DNS record after reboot
+      ansible.builtin.cron:
+        name: "Update Cloudflare DNS"
+        user: root
+        special_time: "reboot"
+        job: "/usr/local/bin/update_cloudflare_dns.sh >/dev/null 2>&1"
+        cron_file: update_cloudflare_dns_on_reboot
+
+    - name: Ensure the script runs periodically
+      ansible.builtin.cron:
+        name: "Update Cloudflare DNS periodically"
+        user: root
+        minute: "*/5"
+        job: "/usr/local/bin/update_cloudflare_dns.sh >/dev/null 2>&1"
+        cron_file: update_cloudflare_dns_periodically
