@@ -3,9 +3,9 @@
 This project provides an Ansible playbook for setting up a Raspberry Pi as a network ad blocker using Pi-hole, with Unbound serving as a DNS resolver. It's tailored for home lab environments, aiming to enhance network performance and security.
 
 ## Pre-requisites
-- Raspberry Pi Hardware: You need a Raspberry Pi device.
-- Raspberry Pi OS: Install the Raspberry Pi 64-bit OS.
-- Network Connection: Connect your Raspberry Pi to your network.
+- Raspberry Pi Hardware: You need a Raspberry Pi device
+- Raspberry Pi OS: Install the Raspberry Pi 64-bit OS
+- Network Connection: Connect your Raspberry Pi to your network
 
 ## Initial Raspberry Pi Setup
 
