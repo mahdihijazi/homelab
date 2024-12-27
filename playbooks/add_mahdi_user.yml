@@ -1,6 +1,6 @@
 ---
 - name: Configure Raspberry Pi
-  hosts: pis
+  hosts: pihole
   remote_user: pi
   become: true
   vars_files:

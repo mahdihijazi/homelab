@@ -1,6 +1,6 @@
 ---
 - name: Install Dependencies for Managing Pi-hole
-  hosts: pis
+  hosts: pihole
   become: true  # Necessary to install packages with elevated privileges
 
   tasks:
