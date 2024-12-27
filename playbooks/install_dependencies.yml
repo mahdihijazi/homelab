@@ -1,10 +1,64 @@
 ---
-- name: Install Dependencies for Managing Pi-hole
+- name: Install Dependencies for Docker-based Pi-hole
   hosts: pihole
-  become: true  # Necessary to install packages with elevated privileges
+  become: true
+
+  vars:
+    docker_arch: "arm64"
 
   tasks:
-    - name: Install SQLite3
+    - name: Update system and install required packages
       ansible.builtin.apt:
-        name: sqlite3
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - sqlite3
         state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ docker_arch }}] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Update apt cache after adding Docker repository
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Docker
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Check if Docker Compose is already installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/docker-compose
+      register: compose_check
+
+    - name: Install Docker Compose
+      ansible.builtin.get_url:
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      when: not compose_check.stat.exists
+
+    - name: Add current user to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Inform user about session reload for group membership
+      ansible.builtin.debug:
+        msg: "If the current user was added to the 'docker' group, a new session might be required for changes to take effect."
