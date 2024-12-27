@@ -1,11 +1,11 @@
 BLOCKING_ENABLED=true
 DHCP_ACTIVE=false
 PIHOLE_DOMAIN={{ local_domain_name }}
-WEBPASSWORD={{ pihole_password }}
+WEBPASSWORD={{ pihole_password_unhashed }}
 PIHOLE_INTERFACE={{ internal_ifname }}
 IPV4_ADDRESS={{ ipv4_address_with_netmask }}
 IPV6_ADDRESS=
-PIHOLE_DNS_1=127.0.0.1#5335
+PIHOLE_DNS_=127.0.0.1#5335
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true

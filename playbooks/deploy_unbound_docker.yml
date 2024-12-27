@@ -1,0 +1,63 @@
+---
+- name: Deploy Unbound Docker container
+  hosts: zelda
+  become: true
+  vars:
+    unbound_container_name: unbound
+    unbound_image: klutchell/unbound:latest  # Use ARM-compatible image
+
+  tasks:
+    - name: Ensure Unbound configuration directory exists
+      ansible.builtin.file:
+        path: /etc/unbound
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Configure Unbound
+      ansible.builtin.copy:
+        dest: /etc/unbound/unbound.conf
+        content: |
+          server:
+            do-ip6: no
+            port: 5335
+            interface: 0.0.0.0
+            access-control: 127.0.0.0/8 allow
+            access-control: 192.168.0.0/16 allow
+            private-address: 192.168.0.0/16
+            do-tcp: yes
+            hide-identity: yes
+            hide-version: yes
+            harden-glue: yes
+            harden-dnssec-stripped: yes
+            use-caps-for-id: yes
+            cache-min-ttl: 3600
+            cache-max-ttl: 86400
+            prefetch: yes
+            num-threads: 4
+            msg-cache-slabs: 4
+            rrset-cache-slabs: 4
+            infra-cache-slabs: 4
+            key-cache-slabs: 4
+            rrset-cache-size: 256m
+            msg-cache-size: 128m
+            so-rcvbuf: 1m
+            so-sndbuf: 1m
+            so-reuseport: yes
+            minimal-responses: yes
+            module-config: "validator iterator"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Deploy Unbound container
+      community.docker.docker_container:
+        name: "{{ unbound_container_name }}"
+        image: "{{ unbound_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "5335:5335"
+        volumes:
+          - "/etc/unbound:/opt/unbound/etc/unbound"
