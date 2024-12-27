@@ -16,6 +16,15 @@
     ipv4_address_with_netmask: "{{ internal_ip }}/{{ internal_netmask }}"
     local_domain_name: "{{ internal_domain }}"
     dhcp_router: "{{ internal_ip }}"
+    stevenblack_hosts_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+    local_dns_records:
+      - { name: "mahdilab.synology.me", ip: "192.168.2.166" }
+      - { name: "home.mahdilab.synology.me", ip: "192.168.2.166" }
+      - { name: "jellyfin.mahdilab.synology.me", ip: "192.168.2.166" }
+      - { name: "pihole.mahdilab.synology.me", ip: "192.168.2.166" }
+      - { name: "prowlarr.mahdilab.synology.me", ip: "192.168.2.166" }
+      - { name: "transmission.mahdilab.synology.me", ip: "192.168.2.166" }
+      - { name: "mijnmodem.kpn", ip: "192.168.2.254" }
 
   tasks:
     - name: Ensure Pi-hole configuration directory exists
@@ -66,6 +75,45 @@
           - "{{ pihole_volume }}:/etc/pihole"
           - "{{ dnsmasq_volume }}:/etc/dnsmasq.d"
 
+    - name: Adjust rate-limiting in Pi-hole
+      ansible.builtin.lineinfile:
+        path: "{{ pihole_volume }}/pihole-FTL.conf"
+        line: "RATE_LIMIT=2000/60"
+        create: yes
+        state: present
+
+    - name: Increase dns-forward-max in Pi-hole
+      ansible.builtin.lineinfile:
+        path: "{{ dnsmasq_volume }}/99-dnsmasq.conf"
+        line: "dns-forward-max=500"
+        create: yes
+        state: present
+
+    - name: Clear custom DNS records
+      ansible.builtin.command:
+        cmd: 'docker exec {{ pihole_container_name }} bash -c "echo > /etc/pihole/custom.list"'
+      changed_when: true
+
+    - name: Add custom DNS records for Pi-hole
+      ansible.builtin.shell: |
+        echo "{{ item.ip }} {{ item.name }}" >> /etc/pihole/custom.list
+      args:
+        executable: /bin/bash
+      loop: "{{ local_dns_records }}"
+      register: dns_addition
+
+    - name: Add custom blacklist to Pi-hole
+      ansible.builtin.command:
+        cmd: >
+          docker exec {{ pihole_container_name }}
+          pihole -a adlist add {{ stevenblack_hosts_url }}
+      changed_when: false
+
+    - name: Update Pi-hole Gravity
+      ansible.builtin.command:
+        cmd: docker exec {{ pihole_container_name }} pihole -g
+      changed_when: false
+      
     - name: Restart Pi-hole container
       community.docker.docker_container:
         name: pihole
