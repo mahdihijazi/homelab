@@ -25,6 +25,14 @@
       - { name: "prowlarr.mahdilab.synology.me", ip: "192.168.2.166" }
       - { name: "transmission.mahdilab.synology.me", ip: "192.168.2.166" }
       - { name: "mijnmodem.kpn", ip: "192.168.2.254" }
+    rate_limit: "2000/60"
+    dns_forward_max: "500"
+    container_ports:
+      - "80:80"
+      - "443:443"
+      - "53:53"
+      - "53:53/udp"
+    timezone: "Europe/Amsterdam"
 
   tasks:
     - name: Ensure Pi-hole configuration directory exists
@@ -65,12 +73,8 @@
         image: "{{ pihole_image }}"
         state: started
         restart_policy: always
-        hostname: zelda
-        ports:
-          - "80:80"
-          - "443:443"
-          - "53:53"
-          - "53:53/udp"
+        hostname: "{{ internal_domain }}"
+        ports: "{{ container_ports }}"
         env_file: "{{ pihole_volume }}/pihole.env"
         volumes:
           - "{{ pihole_volume }}:/etc/pihole"
@@ -79,14 +83,21 @@
     - name: Adjust rate-limiting in Pi-hole
       ansible.builtin.lineinfile:
         path: "{{ pihole_volume }}/pihole-FTL.conf"
-        line: "RATE_LIMIT=2000/60"
+        line: "RATE_LIMIT={{ rate_limit }}"
         create: yes
         state: present
 
     - name: Increase dns-forward-max in Pi-hole
       ansible.builtin.lineinfile:
         path: "{{ dnsmasq_volume }}/99-dnsmasq.conf"
-        line: "dns-forward-max=500"
+        line: "dns-forward-max={{ dns_forward_max }}"
+        create: yes
+        state: present
+
+    - name: Configure EDNS buffer size
+      ansible.builtin.lineinfile:
+        path: "{{ dnsmasq_volume }}/99-edns.conf"
+        line: "edns-packet-max=1232"
         create: yes
         state: present
 
