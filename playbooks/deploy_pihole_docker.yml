@@ -65,6 +65,7 @@
         image: "{{ pihole_image }}"
         state: started
         restart_policy: always
+        hostname: zelda
         ports:
           - "80:80"
           - "443:443"
