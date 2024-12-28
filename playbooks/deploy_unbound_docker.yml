@@ -30,10 +30,12 @@
             do-ip6: no
             port: {{ unbound_port }}
             interface: 0.0.0.0
+            do-udp: yes
+            do-tcp: yes
             access-control: 127.0.0.0/8 allow
             access-control: 192.168.0.0/16 allow
             private-address: 192.168.0.0/16
-            do-tcp: yes
+            access-control: 172.18.0.0/16 allow
             hide-identity: yes
             hide-version: yes
             harden-glue: yes
@@ -63,10 +65,11 @@
         name: "{{ unbound_container_name }}"
         image: "{{ unbound_image }}"
         state: started
-        restart_policy: always
+        # restart_policy: always disbale it for now to see the error logs
         ports:
-          - "{{ unbound_port }}:{{ unbound_port }}"
+          - "{{ unbound_port }}:{{ unbound_port }}/tcp"
+          - "{{ unbound_port }}:{{ unbound_port }}/udp"
         networks:
           - name: pihole_unbound_net
         volumes:
-          - "{{ unbound_config_dir }}:/opt/unbound/etc/unbound"
+          - "{{ unbound_config_dir }}/unbound.conf:/etc/unbound/unbound.conf"
