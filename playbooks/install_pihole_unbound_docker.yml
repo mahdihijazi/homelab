@@ -7,6 +7,9 @@
 - name: Install and configure Docker environment
   import_playbook: install_docker.yml
 
+- name: Create Docker network for Pi-hole and Unbound
+  import_playbook: create_docker_network.yml
+
 - name: Deploy Unbound Docker container
   import_playbook: deploy_unbound_docker.yml
 

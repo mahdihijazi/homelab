@@ -66,5 +66,7 @@
         restart_policy: always
         ports:
           - "{{ unbound_port }}:{{ unbound_port }}"
+        networks:
+          - name: pihole_unbound_net
         volumes:
           - "{{ unbound_config_dir }}:/opt/unbound/etc/unbound"

@@ -76,6 +76,8 @@
         hostname: "{{ internal_domain }}"
         ports: "{{ container_ports }}"
         env_file: "{{ pihole_volume }}/pihole.env"
+        networks:
+          - name: pihole_unbound_net
         volumes:
           - "{{ pihole_volume }}:/etc/pihole"
           - "{{ dnsmasq_volume }}:/etc/dnsmasq.d"
