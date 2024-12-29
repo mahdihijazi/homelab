@@ -1,10 +1,8 @@
 ---
-- name: Deploy Unbound Docker container
+- name: Install and Configure Unbound on Bare Metal
   hosts: zelda
   become: true
   vars:
-    unbound_container_name: unbound
-    unbound_image: klutchell/unbound:latest
     unbound_config_dir: /etc/unbound
     unbound_port: 5335
     unbound_threads: 4
@@ -12,64 +10,54 @@
     unbound_cache_max_ttl: 86400
     unbound_rrset_cache_size: 256m
     unbound_msg_cache_size: 128m
-
+    root_hints_url: "https://www.internic.net/domain/named.root"
   tasks:
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
+
+    - name: Install Unbound and necessary packages
+      apt:
+        name:
+          - unbound
+          - wget
+        state: present
+
     - name: Ensure Unbound configuration directory exists
-      ansible.builtin.file:
+      file:
         path: "{{ unbound_config_dir }}"
         state: directory
         owner: root
         group: root
         mode: '0755'
 
-    - name: Configure Unbound
-      ansible.builtin.copy:
+    - name: Download root hints file
+      get_url:
+        url: "{{ root_hints_url }}"
+        dest: "{{ unbound_config_dir }}/root.hints"
+        mode: '0644'
+        owner: root
+        group: root
+      notify: Restart Unbound
+
+    - name: Configure Unbound using template
+      template:
+        src: templates/unbound.conf.j2
         dest: "{{ unbound_config_dir }}/unbound.conf"
-        content: |
-          server:
-            do-ip6: no
-            port: {{ unbound_port }}
-            interface: 0.0.0.0
-            do-udp: yes
-            do-tcp: yes
-            access-control: 127.0.0.0/8 allow
-            access-control: 192.168.0.0/16 allow
-            private-address: 192.168.0.0/16
-            access-control: 172.18.0.0/16 allow
-            hide-identity: yes
-            hide-version: yes
-            harden-glue: yes
-            harden-dnssec-stripped: yes
-            use-caps-for-id: yes
-            cache-min-ttl: {{ unbound_cache_min_ttl }}
-            cache-max-ttl: {{ unbound_cache_max_ttl }}
-            prefetch: yes
-            num-threads: {{ unbound_threads }}
-            msg-cache-slabs: {{ unbound_threads }}
-            rrset-cache-slabs: {{ unbound_threads }}
-            infra-cache-slabs: {{ unbound_threads }}
-            key-cache-slabs: {{ unbound_threads }}
-            rrset-cache-size: {{ unbound_rrset_cache_size }}
-            msg-cache-size: {{ unbound_msg_cache_size }}
-            so-rcvbuf: 1m
-            so-sndbuf: 1m
-            so-reuseport: yes
-            minimal-responses: yes
-            module-config: "validator iterator"
         owner: root
         group: root
         mode: '0644'
+      notify: Restart Unbound
 
-    - name: Deploy Unbound container
-      community.docker.docker_container:
-        name: "{{ unbound_container_name }}"
-        image: "{{ unbound_image }}"
+    - name: Ensure Unbound service is enabled and started
+      systemd:
+        name: unbound
+        enabled: yes
         state: started
-        # restart_policy: always disbale it for now to see the error logs
-        ports:
-          - "{{ unbound_port }}:{{ unbound_port }}/tcp"
-          - "{{ unbound_port }}:{{ unbound_port }}/udp"
-        networks:
-          - name: pihole_unbound_net
-        volumes:
-          - "{{ unbound_config_dir }}/unbound.conf:/etc/unbound/unbound.conf"
+
+  handlers:
+    - name: Restart Unbound
+      systemd:
+        name: unbound
+        state: restarted
