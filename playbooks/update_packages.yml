@@ -1,5 +1,6 @@
 ---
-- hosts: pihole
+- name: Update Packages & Install Dependencies
+  hosts: zelda
   become: true
 
   tasks:
@@ -10,3 +11,8 @@
     - name: Upgrade all packages to the latest version
       ansible.builtin.apt:
         upgrade: dist
+
+    - name: Install dnsutils package
+      ansible.builtin.apt:
+        name: dnsutils
+        state: present
