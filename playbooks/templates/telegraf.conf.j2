@@ -1,0 +1,33 @@
+# Global Agent Configuration
+[agent]
+  interval = "10s"  # Polling interval
+  round_interval = true
+  flush_interval = "10s"
+  flush_jitter = "0s"
+  precision = ""
+  omit_hostname = false
+
+# InfluxDB Output Plugin
+[[outputs.influxdb_v2]]
+  urls = ["http://192.168.2.166:8086"] # InfluxDB server URL
+  token = "DNJmcTLgt73h8PzAAgsEJt8YXTYW37OQFsES6D5uOyL8Hzw3LNGbFaN1x0-MkDMB0ctW5yVS_pZioHZBvB89Ug=="
+  organization = "homelab"
+  bucket = "homelab_metrics"
+
+# Input Plugins
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+  collect_cpu_time = false
+  report_active = false
+
+[[inputs.mem]]
+
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs"]
+
+[[inputs.net]]
+
+[[inputs.system]]
+
+[[inputs.processes]]

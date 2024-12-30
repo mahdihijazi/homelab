@@ -15,3 +15,6 @@
 
 - name: Deploy Pi-hole Docker container
   import_playbook: deploy_pihole_docker.yml
+
+- name: Deploy Telegraf Container
+  import_playbook: telegraf.yml
