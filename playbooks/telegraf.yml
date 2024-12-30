@@ -1,6 +1,6 @@
 ---
 - name: Deploy Telegraf as a Docker container
-  hosts: zelda
+  hosts: zelda # don't change this later. Install telegraf only once on the 4GB RAM PI 4
   become: true
 
   tasks:
