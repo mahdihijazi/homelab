@@ -28,6 +28,12 @@
         image: telegraf:latest
         state: started
         restart_policy: always
+        privileged: true
         volumes:
           - /home/pi/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+          - /sys:/sys:ro
+          - /opt/vc:/opt/vc:ro  # Mount for vcgencmd
+        env:  # Use "env" instead of "environment"
+          TZ: Europe/Amsterdam
         network_mode: host
+

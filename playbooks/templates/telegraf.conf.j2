@@ -52,3 +52,9 @@
 [[inputs.system]]
 
 [[inputs.processes]]
+
+[[inputs.file]]
+  files = ["/sys/class/thermal/thermal_zone0/temp"]
+  data_format = "value"
+  data_type = "integer"
+  name_override = "pihole_zelda_temperature"
