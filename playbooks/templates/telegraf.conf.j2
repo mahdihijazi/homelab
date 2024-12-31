@@ -17,6 +17,7 @@
 
 # Input Plugins
 
+# Zelda Pihole
 [[inputs.http]]
   urls = ["http://192.168.2.100/admin/api.php?summaryRaw&auth=edca135e3fe09b4b48435f0e5963ed99c39f2f4b1eb83e88058368454c917b58"]
   method = "GET"
@@ -25,6 +26,14 @@
   data_format = "json"
   name_override = "pihole_zelda"
 
+# Link Pihole
+[[inputs.http]]
+  urls = ["http://192.168.2.101/admin/api.php?summaryRaw&auth=edca135e3fe09b4b48435f0e5963ed99c39f2f4b1eb83e88058368454c917b58"]
+  method = "GET"
+  timeout = "5s"
+  success_status_codes = [200]
+  data_format = "json"
+  name_override = "pihole_link"
 
 # System Monitoring
 [[inputs.cpu]]
