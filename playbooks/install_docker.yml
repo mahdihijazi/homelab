@@ -2,38 +2,5 @@
 - name: Install Docker
   hosts: zelda
   become: true
-  tasks:
-    - name: Update system and install required packages
-      ansible.builtin.apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - gnupg
-          - lsb-release
-        state: present
-        update_cache: yes
-
-    - name: Add Docker GPG key
-      ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/debian/gpg
-        state: present
-
-    - name: Add Docker repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=arm64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
-        state: present
-
-    - name: Install Docker
-      ansible.builtin.apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-        state: present
-
-    - name: Install Docker Compose
-      ansible.builtin.get_url:
-        url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64
-        dest: /usr/local/bin/docker-compose
-        mode: '0755'
+  roles:
+    - install_docker
