@@ -5,11 +5,9 @@
 
   roles:
     - update_pi_packages
+    - install_docker
 
   tasks:
-  
-- name: Install and configure Docker environment
-  import_playbook: install_docker.yml
 
 - name: Deploy Unbound Docker container
   import_playbook: deploy_unbound_docker.yml

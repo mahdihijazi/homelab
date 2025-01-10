@@ -3,12 +3,11 @@
   hosts: zelda
   become: true
 
-  tasks:
-- name: Update Packages & Install Dependencies
-  import_playbook: update_packages.yml
+  roles:
+    - update_pi_packages
+    - install_docker
 
-- name: Install and configure Docker environment
-  import_playbook: install_docker.yml
+  tasks:
 
 - name: Deploy Unbound Docker container
   import_playbook: deploy_unbound_docker.yml

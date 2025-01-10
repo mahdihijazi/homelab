@@ -4,38 +4,6 @@
   become: true
   vars_files:
     - homelab_vault.yml
-  vars:
-    pihole_container_name: pihole
-    pihole_image: pihole/pihole:latest
-    pihole_volume: "/etc/pihole"
-    dnsmasq_volume: "/etc/dnsmasq.d"
-    internal_ip: "{{ ansible_default_ipv4.address }}"
-    internal_domain: "{{ ansible_hostname }}"
-    internal_netmask: "24"
-    internal_ifname: "{{ ansible_default_ipv4.interface }}"  # Detect interface dynamically
-    ipv4_address_with_netmask: "{{ internal_ip }}/{{ internal_netmask }}"
-    local_domain_name: "{{ internal_domain }}"
-    dhcp_router: "{{ internal_ip }}"
-    stevenblack_hosts_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
-    local_dns_records:
-      - { name: "mahdilab.synology.me", ip: "192.168.2.166" }
-      - { name: "home.mahdilab.synology.me", ip: "192.168.2.166" }
-      - { name: "jellyfin.mahdilab.synology.me", ip: "192.168.2.166" }
-      - { name: "pihole.mahdilab.synology.me", ip: "192.168.2.166" }
-      - { name: "prowlarr.mahdilab.synology.me", ip: "192.168.2.166" }
-      - { name: "transmission.mahdilab.synology.me", ip: "192.168.2.166" }
-      - { name: "mijnmodem.kpn", ip: "192.168.2.254" }
-    rate_limit: "2000/60"
-    dns_forward_max: "500"
-    container_ports:
-      - "80:80"
-      - "443:443"
-      - "53:53"
-      - "53:53/udp"
-    timezone: "Europe/Amsterdam"
-    # Host's Unbound DNS
-    unbound_host_ip: "{{ ansible_default_ipv4.address }}"
-    unbound_port: 5335
 
   roles:
     - install_pihole
