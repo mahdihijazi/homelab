@@ -1,16 +1,10 @@
 ---
-- name: Install Docker-based Pi-hole and Unbound
+- name: Install Docker-based Pi-hole and Unbound on Link
   hosts: link
   become: true
 
   roles:
     - update_pi_packages
     - install_docker
-
-  tasks:
-
-- name: Deploy Unbound Docker container
-  import_playbook: deploy_unbound_docker.yml
-
-- name: Deploy Pi-hole Docker container
-  import_playbook: install_pihole.yml
+    - install_unbound
+    - install_pihole

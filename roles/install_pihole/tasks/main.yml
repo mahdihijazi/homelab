@@ -1,4 +1,7 @@
 ---
+- name: Load variables from vault
+  include_vars: homelab_vault.yml
+  
 - name: Ensure Pi-hole configuration directory exists
   file:
     path: "{{ pihole_volume }}"

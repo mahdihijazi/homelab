@@ -6,14 +6,10 @@
   roles:
     - update_pi_packages
     - install_docker
+    - install_unbound
+    - install_pihole
 
   tasks:
-
-- name: Deploy Unbound Docker container
-  import_playbook: deploy_unbound_docker.yml
-
-- name: Deploy Pi-hole Docker container
-  import_playbook: install_pihole.yml
 
 - name: Deploy Telegraf Container
   import_playbook: telegraf.yml

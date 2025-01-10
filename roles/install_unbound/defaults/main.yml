@@ -1,0 +1,10 @@
+---
+# Default variables for roles/install_unbound
+unbound_config_dir: /etc/unbound
+unbound_port: 5335
+unbound_threads: 4
+unbound_cache_min_ttl: 3600
+unbound_cache_max_ttl: 86400
+unbound_rrset_cache_size: 256m
+unbound_msg_cache_size: 128m
+root_hints_url: "https://www.internic.net/domain/named.root"
