@@ -2,17 +2,5 @@
 - name: Update Packages & Install Dependencies
   hosts: all
   become: true
-
-  tasks:
-    - name: Update APT package cache
-      ansible.builtin.apt:
-        update_cache: yes
-
-    - name: Upgrade all packages to the latest version
-      ansible.builtin.apt:
-        upgrade: dist
-
-    - name: Install dnsutils package
-      ansible.builtin.apt:
-        name: dnsutils
-        state: present
+  roles:
+    - update_pi_packages
