@@ -1,0 +1,6 @@
+---
+- name: Restart Pi-hole
+  community.docker.docker_container:
+    name: "{{ pihole_container_name }}"
+    state: started
+    restart: true

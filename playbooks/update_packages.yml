@@ -1,6 +1,6 @@
 ---
 - name: Update Packages & Install Dependencies
-  hosts: zelda
+  hosts: all
   become: true
 
   tasks:

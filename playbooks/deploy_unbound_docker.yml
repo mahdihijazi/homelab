@@ -1,6 +1,6 @@
 ---
 - name: Install and Configure Unbound on Bare Metal
-  hosts: zelda
+  hosts: pihole
   become: true
   vars:
     unbound_config_dir: /etc/unbound

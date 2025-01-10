@@ -1,6 +1,6 @@
 ---
 - name: Install Docker
-  hosts: zelda
+  hosts: pihole
   become: true
   roles:
     - install_docker

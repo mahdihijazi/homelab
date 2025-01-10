@@ -1,6 +1,6 @@
 ---
 - name: Install Docker-based Pi-hole and Unbound
-  hosts: zelda
+  hosts: pihole
   become: true
 
   tasks:
@@ -14,7 +14,7 @@
   import_playbook: deploy_unbound_docker.yml
 
 - name: Deploy Pi-hole Docker container
-  import_playbook: deploy_pihole_docker.yml
+  import_playbook: install_pihole.yml
 
 - name: Deploy Telegraf Container
   import_playbook: telegraf.yml

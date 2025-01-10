@@ -1,6 +1,4 @@
 ---
-# tasks file for roles/install_docker
-
 - name: Update system and install required packages
   ansible.builtin.apt:
     name:
