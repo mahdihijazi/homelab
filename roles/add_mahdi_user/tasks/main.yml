@@ -1,5 +1,4 @@
 ---
-# vars file for roles/add_mahdi_user
 - name: Create user 'mahdi'
   user:
     name: mahdi

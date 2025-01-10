@@ -1,5 +1,5 @@
 ---
-- name: Install Docker-based Pi-hole and Unbound
+- name: Install Docker-based Pi-hole and Unbound on Zelda
   hosts: zelda
   become: true
 

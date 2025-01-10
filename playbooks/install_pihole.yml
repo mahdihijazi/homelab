@@ -1,7 +1,0 @@
----
-- name: Deploy Pi-hole Docker Container Using Host's Unbound
-  hosts: pihole
-  become: true
-
-  roles:
-    - install_pihole

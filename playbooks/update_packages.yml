@@ -1,6 +1,0 @@
----
-- name: Update Packages & Install Dependencies
-  hosts: all
-  become: true
-  roles:
-    - update_pi_packages

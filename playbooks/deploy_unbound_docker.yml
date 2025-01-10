@@ -1,7 +1,0 @@
----
-- name: Install and Configure Unbound on Bare Metal
-  hosts: pihole
-  become: true
-
-  roles:
-    - install_unbound
