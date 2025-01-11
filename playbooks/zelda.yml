@@ -8,8 +8,4 @@
     - install_docker
     - install_unbound
     - install_pihole
-
-  tasks:
-
-- name: Deploy Telegraf Container
-  import_playbook: telegraf.yml
+    - install_telegraf
