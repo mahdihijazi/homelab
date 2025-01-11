@@ -8,4 +8,4 @@
     - install_docker
     - install_unbound
     - install_pihole
-    - install_telegraf
+    - install_glances
