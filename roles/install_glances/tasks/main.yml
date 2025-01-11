@@ -1,0 +1,40 @@
+---
+- name: Ensure Docker is installed
+  ansible.builtin.include_role:
+    name: install_docker
+
+- name: Pull Glances Docker image
+  ansible.builtin.docker_image:
+    name: nicolargo/glances
+    tag: latest
+    source: pull
+
+- name: Create Glances configuration directory
+  ansible.builtin.file:
+    path: /home/pi/glances
+    state: directory
+    mode: '0755'
+
+- name: Upload Glances configuration file
+  ansible.builtin.template:
+    src: glances.conf.j2
+    dest: /home/pi/glances/glances.conf
+    mode: '0644'
+
+- name: Run Glances container (monitoring host hardware)
+  ansible.builtin.docker_container:
+    name: glances
+    image: nicolargo/glances:latest-full
+    state: started
+    restart_policy: always
+    env:
+      GLANCES_OPT: "--export influxdb2"  # Export mode only
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro  # Show host OS details
+      - /proc:/host/proc:ro                 # Access to process and CPU info
+      - /sys:/host/sys:ro                   # Access to hardware metrics (CPU, memory, disk)
+      - /dev:/dev:ro                        # Access for sensors (optional for temperature)
+      - /home/pi/glances/glances.conf:/etc/glances/glances.conf:ro
+    network_mode: host                      # Host network access
+    privileged: true                        # Required for full hardware access

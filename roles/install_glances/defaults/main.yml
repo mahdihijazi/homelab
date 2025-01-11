@@ -1,0 +1,9 @@
+---
+influxdb_host: "192.168.2.166"
+influxdb_org: "homelab"
+influxdb_bucket: "homelab_metrics"
+influxdb_token: "iP3Z-GTsGhSSGWmQguDES4tsDHI1xuCZCaZzpdPlD7P22ReoldcOpxt-7doPC23EKUNgGRFmETBU2o5zpISVjw=="
+
+
+
+

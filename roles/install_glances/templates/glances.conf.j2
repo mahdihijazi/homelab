@@ -1,0 +1,16 @@
+[global]
+# Configuration for refresh and web access
+refresh = 3
+webserver_port = 61208
+
+[influxdb2]
+host = {{ influxdb_host | default('localhost') }}
+port = 8086
+protocol = http
+org = {{ influxdb_org | default('homelab') }}
+bucket = {{ influxdb_bucket | default('homelab_metrics') }}
+token = {{ influxdb_token }}
+# Set the interval between two exports (in seconds)
+interval = 10
+# Prefix for measurement names (optional but useful)
+prefix=glances
