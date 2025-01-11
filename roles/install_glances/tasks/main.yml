@@ -35,6 +35,7 @@
       - /proc:/host/proc:ro                 # Access to process and CPU info
       - /sys:/host/sys:ro                   # Access to hardware metrics (CPU, memory, disk)
       - /dev:/dev:ro                        # Access for sensors (optional for temperature)
+      - /:/hostfs:ro                        # Mount host's root filesystem as read-only
       - /home/pi/glances/glances.conf:/etc/glances/glances.conf:ro
     network_mode: host                      # Host network access
     privileged: true                        # Required for full hardware access

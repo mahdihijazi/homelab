@@ -11,6 +11,10 @@ org = {{ influxdb_org | default('homelab') }}
 bucket = {{ influxdb_bucket | default('homelab_metrics') }}
 token = {{ influxdb_token }}
 # Set the interval between two exports (in seconds)
-interval = 10
+interval = 5
 # Prefix for measurement names (optional but useful)
 prefix=glances
+
+[fs]
+# Use host filesystem mounted in /hostfs
+filesystems=/hostfs/
